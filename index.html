@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サポートレター 作成支援</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif; background: #f7f7fa; color: #2c2c2c; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+header { background: #fff; border-bottom: 1px solid #dddde6; padding: 14px 24px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
+.header-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; background: #2d5a3d; }
+.header-title { font-weight: 600; font-size: 15px; }
+.header-sub { font-size: 11px; color: #6b6b6b; }
+.header-btns { margin-left: auto; display: flex; gap: 8px; }
+.header-btn { font-size: 12px; color: #6b6b6b; background: none; border: 1px solid #dddde6; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-family: inherit; }
+
+.main { max-width: 720px; width: 100%; margin: 0 auto; padding: 20px; }
+
+.card { background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #dddde6; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 16px; }
+.card h3 { font-size: 15px; font-weight: 600; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.card p.desc { font-size: 13px; color: #6b6b6b; margin: 0 0 20px; }
+
+.btn-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.btn-test { flex: 1; padding: 9px 0; border-radius: 10px; border: 1px dashed #888; font-size: 12px; font-weight: 500; cursor: pointer; background: #f0f0f0; color: #555; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; }
+.btn-test:disabled { opacity: 0.5; cursor: default; }
+
+.field { margin-bottom: 16px; }
+.field label { font-size: 13px; font-weight: 500; margin-bottom: 6px; display: block; color: #6b6b6b; }
+.field input, .field select, .field textarea { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #dddde6; font-size: 14px; background: #f7f7fa; color: #2c2c2c; font-family: inherit; }
+.field textarea { min-height: 60px; resize: vertical; line-height: 1.6; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #3d4a7a; box-shadow: 0 0 0 3px #e8eaf4; }
+
+.btn-gen { width: 100%; padding: 12px 0; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; color: white; transition: all 0.2s; font-family: inherit; margin-top: 8px; }
+.btn-gen:disabled { background: #ccc !important; opacity: 0.5; cursor: default; }
+.btn-confirm { width: 100%; padding: 12px 0; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; color: white; background: #2d5a3d; font-family: inherit; margin-bottom: 16px; }
+
+.result-card { padding: 20px 24px; border-radius: 16px; border: 1px solid; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 16px; }
+.result-header { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.result-text { font-size: 13.5px; line-height: 1.8; white-space: pre-wrap; }
+.result-item { padding: 10px 0; font-size: 13.5px; line-height: 1.7; display: flex; gap: 10px; }
+.result-item:not(:last-of-type) { border-bottom: 1px solid #dddde6; }
+.result-num { font-weight: 700; font-size: 13px; min-width: 22px; padding-top: 1px; }
+.result-hint { margin-top: 14px; font-size: 12px; color: #6b6b6b; background: #f7f7fa; padding: 10px 14px; border-radius: 10px; }
+
+.chat-section { margin-bottom: 16px; }
+.msg { display: flex; margin-bottom: 10px; }
+.msg.user { justify-content: flex-end; }
+.msg.assistant { justify-content: flex-start; }
+.bubble { max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+.bubble.user { border-bottom-right-radius: 4px; color: white; }
+.bubble.assistant { border-bottom-left-radius: 4px; }
+
+.typing { display: inline-flex; gap: 5px; padding: 10px 14px; border-radius: 14px; border-bottom-left-radius: 4px; align-items: center; margin-bottom: 10px; }
+.typing span { font-size: 12px; color: #6b6b6b; margin-left: 10px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #9a9a9a; animation: bounce 1.2s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay: 0.15s; }
+.dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+.input-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 8px; }
+.input-row textarea { flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #dddde6; font-size: 14px; resize: none; line-height: 1.6; background: #f7f7fa; font-family: inherit; min-height: 42px; max-height: 120px; overflow-y: auto; }
+.input-row textarea:focus { outline: none; border-color: #3d4a7a; box-shadow: 0 0 0 3px #e8eaf4; }
+.btn-send { padding: 10px 18px; border-radius: 12px; border: none; color: white; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 42px; font-family: inherit; }
+.btn-send:disabled { background: #ccc !important; opacity: 0.5; cursor: default; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ============================================================
+// Colors for each section
+// ============================================================
+const COLORS = {
+  job:       { accent:"#7a5230", light:"#f5efe8", bg:"#ede4d8" },
+  biz:       { accent:"#6b4c9a", light:"#f0ebf8", bg:"#ede8f5" },
+  change:    { accent:"#8a6d3b", light:"#fdf5e6", bg:"#faf0d7" },
+  challenge: { accent:"#a94442", light:"#f8e8e7", bg:"#f5dbd9" },
+  personnel: { accent:"#31708f", light:"#e7f3f8", bg:"#d9edf7" },
+  duty:      { accent:"#2d5a3d", light:"#e8f0eb", bg:"#f0efe8" },
+  exp:       { accent:"#3d4a7a", light:"#e8eaf4", bg:"#eae8f0" },
+};
+
+// ============================================================
+// State
+// ============================================================
+let S = {
+  // Job History
+  jobEntries: [
+    {period:"",dept:"",title:"",role:"",work:"",result:"",text:"",history:[],chat:[],confirmed:false},
+  ],
+  jobConfirmed:false,
+  // Business Overview
+  bizProduct:"", bizActivity:"", bizCustomer:"", bizStrength:"",
+  bizText:"", bizHistory:[], bizChat:[], bizConfirmed:false,
+  // Situation Change
+  changeWhat:"", changeImpact:"",
+  changeText:"", changeHistory:[], changeChat:[], changeConfirmed:false,
+  // Challenge
+  challengeGap:"", challengeWhere:"",
+  challengeText:"", challengeHistory:[], challengeChat:[], challengeConfirmed:false,
+  // Required Personnel
+  personnelSkill:"", personnelWhy:"",
+  personnelText:"", personnelHistory:[], personnelChat:[], personnelConfirmed:false,
+  // Duty
+  usDepartment:"", usPosition:"", usOfficeRole:"", domain:"",
+  dutyItems:[], dutyHistory:[], dutyChat:[], dutyConfirmed:false,
+  // Experience
+  department:"", position:"", yearsExperience:"", relevantExperience:"",
+  expItems:[], expHistory:[], expChat:[],
+  // UI
+  loading:false, loadingMode:"", testLoading:false, _testData:null
+};
+
+// ============================================================
+// Render
+// ============================================================
+function render() {
+  try {
+    document.getElementById("app").innerHTML = renderPage();
+    bindAll();
+  } catch(e) {
+    console.error("Render error:", e);
+    document.getElementById("app").innerHTML = `<div style="padding:20px;color:red">表示エラー: ${e.message}<br><pre>${e.stack}</pre></div>`;
+  }
+}
+
+function renderPage() {
+  const hasAny = S.bizProduct || S.bizText || S.changeText || S.challengeText || S.personnelText || S.dutyItems.length || S.jobEntries.some(e=>e.period) || S.expItems.length;
+  let h = `
+  <header>
+    <div class="header-icon">SL</div>
+    <div><div class="header-title">サポートレター 作成支援</div><div class="header-sub">v41</div></div>
+    ${hasAny ? `<div class="header-btns"><button class="header-btn" onclick="copyLog()">📋 ログをコピー</button><button class="header-btn" onclick="resetAll()">最初からやり直す</button></div>` : ""}
+  </header>
+  <div class="main">`;
+
+  // === Step 1: ビジネス概要 ===
+  h += renderStep("biz", "1", "ビジネス概要", "米国子会社の事業内容を入力してください",
+    S.bizConfirmed || S.bizText, S.bizText,
+    () => stepFields("biz", [
+      {k:"bizProduct", l:"米国子会社が扱っている製品・サービス", p:"例：産業用ロボット、クラウド会計ソフト、冷凍食品"},
+      {k:"bizActivity", l:"それらをどうしていますか？（事業活動）", p:"例：製造している、販売している、開発・提供している"},
+      {k:"bizCustomer", l:"何に使われますか？誰に提供していますか？", p:"例：自動車メーカーの組立ラインで使用、一般消費者向け"},
+      {k:"bizStrength", l:"米国市場での強み・特徴", p:"例：高精度な制御技術で評価されている、日本の品質管理ノウハウ"},
+    ]),
+    "business_overview", S.bizProduct && S.bizActivity && S.bizCustomer && S.bizStrength,
+    "===BIZ_START===", "===BIZ_END===");
+
+  // === Step 2: 状況の変化 ===
+  if (S.bizConfirmed) {
+    h += renderStep("change", "2", "状況の変化", "米国事業に影響を与えている変化を入力してください",
+      S.changeConfirmed || S.changeText, S.changeText,
+      () => stepFields("change", [
+        {k:"changeWhat", l:"最近、米国の事業に影響を与えている変化は何ですか？", p:"例：競合他社の参入が増えている、原材料コストが上がっている", ta:true},
+        {k:"changeImpact", l:"その変化によって、具体的にどんな影響が出ていますか？", p:"例：売上が落ちている、既存の製品では対応できなくなった", ta:true},
+      ]),
+      "situation_change", S.changeWhat && S.changeImpact,
+      "===CHANGE_START===", "===CHANGE_END===");
+  }
+
+  // === Step 3: 課題 ===
+  if (S.changeConfirmed) {
+    h += renderStep("challenge", "3", "課題", "状況の変化から生じている課題を入力してください",
+      S.challengeConfirmed || S.challengeText, S.challengeText,
+      () => stepFields("challenge", [
+        {k:"challengeGap", l:"今の米国側で何が足りていませんか？", p:"例：技術的な知識が不足、管理体制が整っていない", ta:true},
+        {k:"challengeWhere", l:"どの部門で、どんな課題を解決する必要がありますか？", p:"例：営業部門で新しい提案手法を確立", ta:true},
+      ]),
+      "challenge", S.challengeGap && S.challengeWhere,
+      "===CHALLENGE_START===", "===CHALLENGE_END===");
+  }
+
+  // === Step 4: 必要な人材 ===
+  if (S.challengeConfirmed) {
+    h += renderStep("personnel", "4", "必要な人材", "課題を解決するために必要な人材を入力してください",
+      S.personnelConfirmed || S.personnelText, S.personnelText,
+      () => stepFields("personnel", [
+        {k:"personnelSkill", l:"この課題を解決するために、どんなスキルや経験を持った人が必要ですか？", p:"例：日本本社での品質管理経験、海外拠点の立ち上げ経験", ta:true},
+        {k:"personnelWhy", l:"なぜ現地採用ではなく、日本から派遣する必要がありますか？", p:"例：日本本社の技術・ノウハウを移管する必要がある", ta:true},
+      ]),
+      "required_personnel", S.personnelSkill && S.personnelWhy,
+      "===PERSONNEL_START===", "===PERSONNEL_END===");
+  }
+
+  // === Step 5: 業務内容 ===
+  if (S.personnelConfirmed) {
+    h += renderDutyInput();
+    if (S.dutyItems.length > 0 || (S.loading && S.loadingMode === "duty")) {
+      h += renderListSection(COLORS.duty, "📋 米国での業務内容", S.dutyItems, S.dutyChat, "duty", "===DUTIES_START===", "===DUTIES_END===");
+    }
+    if (S.dutyItems.length > 0 && !S.loading && !S.dutyConfirmed) {
+      h += `<button class="btn-confirm" onclick="S.dutyConfirmed=true;render();scrollDown()">この業務内容で確定する ✓</button>`;
+    }
+  }
+
+  // === Step 6: 職歴 ===
+  if (S.dutyConfirmed) {
+    h += renderJobHistory();
+  }
+
+  // === Step 7: 業務経験 ===
+  if (S.jobConfirmed) {
+    h += renderExpInput(S.expItems.length > 0 || S.loading);
+    if (S.expItems.length > 0 || (S.loading && S.loadingMode === "experience")) {
+      h += renderListSection(COLORS.exp, "📝 これまでの業務経験", S.expItems, S.expChat, "experience", "===EXP_START===", "===EXP_END===");
+    }
+  }
+
+  h += `</div>`;
+  return h;
+}
+
+// ============================================================
+// Reusable step renderer for paragraph sections (dispatch reason)
+// ============================================================
+function renderStep(colorKey, num, title, desc, hasResult, text, fieldsFn, mode, valid, startTag, endTag) {
+  const c = COLORS[colorKey];
+  const isLoading = S.loading && S.loadingMode === mode;
+  const confirmed = S[colorKey+"Confirmed"];
+  const disabled = hasResult;
+  let h = "";
+
+  // Input card
+  h += `<div class="card" style="border-color:${c.light}">
+    <h3 style="color:${c.accent}">Step ${num}：${title}</h3>
+    <p class="desc">${desc}</p>`;
+  if (!disabled && S._testData) {
+    h += `<div class="btn-row"><button class="btn-test" onclick="loadTestStep('${colorKey}')">🧪 テストデータを入力</button></div>`;
+  } else if (!disabled && !S._testData) {
+    h += `<div class="btn-row"><button class="btn-test" onclick="generateAndLoadStep('${colorKey}')" ${S.testLoading?"disabled":""}>${S.testLoading?"⏳ 生成中...":"🧪 テストデータを生成して入力"}</button></div>`;
+  }
+  h += fieldsFn();
+  if (!disabled) {
+    h += `<button id="btn_${colorKey}" class="btn-gen" data-color="${c.accent}" style="background:${valid?c.accent:"#ccc"}" ${valid?"":"disabled"} onclick="generate('${mode}')">生成する →</button>`;
+  }
+  h += `</div>`;
+
+  // Result
+  if (text || isLoading) {
+    h += renderTextResult(c, title, text, S[colorKey+"Chat"], mode, startTag, endTag, isLoading);
+  }
+
+  // Confirm button
+  if (text && !S.loading && !confirmed) {
+    h += `<button class="btn-confirm" onclick="S['${colorKey}Confirmed']=true;render();scrollDown()">この内容で確定する ✓</button>`;
+  }
+
+  return h;
+}
+
+function stepFields(colorKey, fields) {
+  const disabled = S[colorKey+"Text"] || S[colorKey+"Confirmed"];
+  return fields.map(f => {
+    if (f.ta) {
+      return `<div class="field"><label>${f.l}</label><textarea id="f_${f.k}" placeholder="${f.p}" ${disabled?"disabled style='opacity:0.7'":""}>${S[f.k]}</textarea></div>`;
+    }
+    return `<div class="field"><label>${f.l}</label><input id="f_${f.k}" value="${S[f.k]}" placeholder="${f.p}" ${disabled?"disabled style='opacity:0.7'":""}></div>`;
+  }).join("");
+}
+
+function renderTextResult(c, title, text, chat, mode, startTag, endTag, isLoading) {
+  let h = "";
+  if (isLoading && !text) {
+    h += `<div class="result-card" style="background:${c.light};border-color:${c.light}">
+      <div class="result-header" style="color:${c.accent}">${title}</div>
+      <div class="typing" style="background:${c.bg}"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>生成中...</span></div>
+    </div>`;
+    return h;
+  }
+  if (text) {
+    h += `<div class="result-card" style="background:${c.light};border-color:${c.light}">
+      <div class="result-header" style="color:${c.accent}">${title}</div>
+      <div class="result-text">${escHtml(text)}</div>
+      <div class="result-hint">💡 修正があればチャットで伝えてください</div>
+    </div>`;
+    h += renderChatArea(c, chat, mode, isLoading);
+  }
+  return h;
+}
+
+function renderListSection(c, title, items, chat, mode, startTag, endTag) {
+  const isLoading = S.loading && S.loadingMode === mode;
+  let h = "";
+  if (isLoading && items.length === 0) {
+    h += `<div class="result-card" style="background:${c.light};border-color:${c.light}">
+      <div class="result-header" style="color:${c.accent}">${title}</div>
+      <div class="typing" style="background:${c.bg}"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>生成中...</span></div>
+    </div>`;
+    return h;
+  }
+  if (items.length > 0) {
+    h += `<div class="result-card" style="background:${c.light};border-color:${c.light}">
+      <div class="result-header" style="color:${c.accent}">${title}の候補（${items.length}件）</div>
+      ${items.map((d,i) => `<div class="result-item"><span class="result-num" style="color:${c.accent}">${i+1}.</span><span>${escHtml(d)}</span></div>`).join("")}
+      <div class="result-hint">💡 追加で候補が欲しい場合や、方向性のリクエストがあればチャットで伝えてください</div>
+    </div>`;
+    h += renderChatArea(c, chat, mode, isLoading);
+  }
+  return h;
+}
+
+function renderChatArea(c, chat, mode, isLoading) {
+  const chatHtml = chat.map(m => {
+    const cleaned = cleanTags(m.content);
+    if (!cleaned) return "";
+    const cls = m.role === "user" ? "user" : "assistant";
+    const bg = m.role === "user" ? c.accent : c.bg;
+    return `<div class="msg ${cls}"><div class="bubble ${cls}" style="background:${bg}">${escHtml(cleaned)}</div></div>`;
+  }).join("");
+  const loadingChat = isLoading ? `<div class="typing" style="background:${c.bg}"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>生成中...</span></div>` : "";
+  return `<div class="chat-section">${chatHtml}${loadingChat}
+    <div class="input-row">
+      <textarea id="chat_${mode}" rows="1" placeholder="修正や追加のリクエストを入力..." ${S.loading?"disabled":""}></textarea>
+      <button class="btn-send" style="background:${S.loading?"#ccc":c.accent}" ${S.loading?"disabled":""} onclick="sendMsg('${mode}')">送信</button>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// Duty & Experience input cards
+// ============================================================
+// ============================================================
+// Job History
+// ============================================================
+function renderJobHistory() {
+  const c = COLORS.job;
+  let h = `<div class="card" style="border-color:${c.light}">
+    <h3 style="color:${c.accent}">📄 Step 6：職歴</h3>
+    <p class="desc">職歴を入力してください</p>`;
+
+  // Each entry - only show if previous is confirmed (or first entry)
+  S.jobEntries.forEach((e, i) => {
+    if (i > 0 && !S.jobEntries[i-1].confirmed) return; // skip if previous not confirmed
+    const isLoadingThis = S.loading && S.loadingMode === "job_"+i;
+    const disabled = e.confirmed;
+    const canEdit = i === 0 || S.jobEntries[i-1].confirmed;
+
+    h += `<div style="background:${e.confirmed?c.light:"#fff"};border:1px solid ${c.light};border-radius:12px;padding:16px;margin-bottom:12px">`;
+
+    // Header with controls
+    h += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-weight:600;font-size:13px;color:${c.accent}">職歴 ${i+1}</div>
+      <div style="display:flex;gap:4px">`;
+    if (!disabled && S.jobEntries.length > 1) {
+      if (i > 0) h += `<button onclick="moveJob(${i},-1)" style="border:1px solid #ddd;background:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px">↑</button>`;
+      if (i < S.jobEntries.length-1) h += `<button onclick="moveJob(${i},1)" style="border:1px solid #ddd;background:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px">↓</button>`;
+      h += `<button onclick="deleteJob(${i})" style="border:1px solid #ddd;background:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#a94442">✕</button>`;
+    }
+    h += `</div></div>`;
+
+    // Test data button per entry (only if canEdit)
+    if (!disabled && canEdit) {
+      const testKey = "job" + (i+1);
+      if (S._testData && S._testData[testKey+"_period"]) {
+        h += `<div class="btn-row"><button class="btn-test" onclick="loadJobTestData(${i},'${testKey}')">🧪 テストデータを入力</button></div>`;
+      } else if (!S._testData) {
+        h += `<div class="btn-row"><button class="btn-test" onclick="generateAndLoadJobTest(${i})" ${S.testLoading?"disabled":""}>${S.testLoading?"⏳ 生成中...":"🧪 テストデータを生成して入力"}</button></div>`;
+      }
+    }
+
+    // Input fields
+    h += jobField(i,"period","期間","例：2018年4月〜2022年3月", disabled || !canEdit);
+    h += jobField(i,"dept","部署名","例：生産技術部 冷凍食品課", disabled || !canEdit);
+    h += jobField(i,"title","役職","例：主任、課長、エンジニア", disabled || !canEdit);
+    h += jobFieldTa(i,"role","この期間の主な役割は何でしたか？","例：新規顧客の開拓、製造ラインの改善、品質管理体制の構築", disabled || !canEdit);
+    h += jobFieldTa(i,"work","具体的に取り組んだことを教えてください","例：自動車メーカー3社との取引関係を構築した", disabled || !canEdit);
+    h += jobFieldTa(i,"result","どんな成果や結果につながりましたか？","例：売上が前年比20%増加した、不良率を半減させた", disabled || !canEdit);
+
+    // Generate button (only if previous is confirmed or this is the first)
+    if (!disabled && !e.text && canEdit) {
+      const filled = e.period && e.dept && e.title && e.role && e.work && e.result;
+      h += `<button id="btn_job_${i}" class="btn-gen" data-color="${c.accent}" style="background:${filled?c.accent:"#ccc"}" ${filled?"":"disabled"} onclick="generateOneJob(${i})">この職歴を生成 →</button>`;
+    }
+    if (!canEdit && !disabled) {
+      h += `<div style="text-align:center;color:#999;font-size:12px;margin-top:8px">↑ 前の職歴を確定すると入力できます</div>`;
+    }
+
+    // Result
+    if (e.text || isLoadingThis) {
+      if (isLoadingThis && !e.text) {
+        h += `<div style="margin-top:12px"><div class="typing" style="background:${c.bg}"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>生成中...</span></div></div>`;
+      } else if (e.text) {
+        h += `<div style="margin-top:12px;background:${c.bg};border-radius:10px;padding:12px">
+          <div class="result-text">${escHtml(e.text)}</div>
+        </div>`;
+        // Chat for this entry
+        h += renderJobChat(c, i, isLoadingThis);
+        // Confirm button
+        if (!e.confirmed && !S.loading) {
+          h += `<button class="btn-confirm" style="margin-top:8px" onclick="confirmJob(${i})">この職歴を確定する ✓</button>`;
+        }
+      }
+    }
+
+    h += `</div>`;
+  });
+
+  h += `</div>`; // close card
+
+  // Add entry button and next step button (only when last entry is confirmed)
+  const lastEntry = S.jobEntries[S.jobEntries.length - 1];
+  const allConfirmed = S.jobEntries.length > 0 && S.jobEntries.every(e => e.confirmed);
+  if (!S.jobConfirmed && allConfirmed) {
+    h += `<div style="display:flex;gap:10px;margin-bottom:16px">
+      <button onclick="addJob()" style="flex:1;padding:12px;border:2px dashed ${c.accent};border-radius:12px;background:none;color:${c.accent};font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">＋ 職歴を追加する</button>
+      <button class="btn-confirm" style="flex:1;margin:0" onclick="S.jobConfirmed=true;render();scrollDown()">職歴の入力を終了する ✓</button>
+    </div>`;
+  }
+
+  return h;
+}
+
+function renderJobChat(c, idx, isLoading) {
+  const chat = S.jobEntries[idx].chat || [];
+  const mode = "job_"+idx;
+  const chatHtml = chat.map(m => {
+    const cleaned = cleanTags(m.content);
+    if (!cleaned) return "";
+    const cls = m.role === "user" ? "user" : "assistant";
+    const bg = m.role === "user" ? c.accent : c.bg;
+    return `<div class="msg ${cls}"><div class="bubble ${cls}" style="background:${bg}">${escHtml(cleaned)}</div></div>`;
+  }).join("");
+  return `<div class="chat-section" style="margin-top:8px">${chatHtml}
+    <div class="input-row">
+      <textarea id="chat_${mode}" rows="1" placeholder="修正リクエストを入力..." ${S.loading?"disabled":""}></textarea>
+      <button class="btn-send" style="background:${S.loading?"#ccc":c.accent}" ${S.loading?"disabled":""} onclick="sendJobMsg(${idx})">送信</button>
+    </div>
+  </div>`;
+}
+
+function addJob() {
+  S.jobEntries.push({period:"",dept:"",title:"",role:"",work:"",result:"",text:"",history:[],chat:[],confirmed:false});
+  render(); scrollDown();
+}
+
+function deleteJob(i) {
+  if (S.jobEntries.length <= 1) return;
+  S.jobEntries.splice(i, 1);
+  render();
+}
+
+function moveJob(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= S.jobEntries.length) return;
+  [S.jobEntries[i], S.jobEntries[j]] = [S.jobEntries[j], S.jobEntries[i]];
+  render();
+}
+
+function confirmJob(i) {
+  S.jobEntries[i].confirmed = true;
+  render();
+}
+
+function loadJobTestData(i, key) {
+  const d = S._testData;
+  if (!d) return;
+  S.jobEntries[i].period = d[key+"_period"]||"";
+  S.jobEntries[i].dept = d[key+"_dept"]||"";
+  S.jobEntries[i].title = d[key+"_title"]||"";
+  S.jobEntries[i].role = d[key+"_role"]||"";
+  S.jobEntries[i].work = d[key+"_work"]||"";
+  S.jobEntries[i].result = d[key+"_result"]||"";
+  render();
+}
+
+async function generateAndLoadJobTest(i) {
+  S.testLoading = true; render();
+  try {
+    const res = await fetch("/api/test-data");
+    if (!res.ok) { alert("テストデータ生成エラー: HTTP "+res.status); S.testLoading=false; render(); return; }
+    const d = await res.json();
+    if (d.error) { alert("エラー: "+d.error); } else {
+      S._testData = d;
+      console.log("Test data keys:", Object.keys(d));
+      // 指定エントリーにテストデータをロード
+      const testKey = "job" + (i+1);
+      if (d[testKey+"_period"]) {
+        S.jobEntries[i].period = d[testKey+"_period"]||"";
+        S.jobEntries[i].dept = d[testKey+"_dept"]||"";
+        S.jobEntries[i].title = d[testKey+"_title"]||"";
+        S.jobEntries[i].role = d[testKey+"_role"]||"";
+        S.jobEntries[i].work = d[testKey+"_work"]||"";
+        S.jobEntries[i].result = d[testKey+"_result"]||"";
+      }
+    }
+  } catch(e) { alert("エラー: "+e.message); }
+  S.testLoading = false; render();
+}
+
+async function generateOneJob(i) {
+  S.loading = true; S.loadingMode = "job_"+i; render();
+  const e = S.jobEntries[i];
+  const userContent = `以下の職歴情報をもとに、CVに使える職歴の文章を1つ生成してください。\n\n期間: ${e.period}\n部署: ${e.dept}\n役職: ${e.title}\n主な役割: ${e.role}\n具体的な取り組み: ${e.work}\n成果・結果: ${e.result}`;
+  const userMsg = {role:"user", content:userContent};
+  e.history = [userMsg];
+  try {
+    const reply = await streamChat([userMsg], "job_history");
+    e.history.push({role:"assistant", content:reply});
+    const parsed = parseText(reply, "===JOB_1_START===", "===JOB_1_END===");
+    e.text = parsed || cleanTags(reply) || reply;
+  } catch(err) { e.chat = [{role:"assistant", content:"エラー: "+err.message}]; }
+  S.loading = false; S.loadingMode = ""; render(); scrollDown();
+}
+
+async function sendJobMsg(i) {
+  const ta = document.getElementById("chat_job_"+i);
+  if (!ta || !ta.value.trim() || S.loading) return;
+  const msg = ta.value.trim();
+  S.loading = true; S.loadingMode = "job_"+i;
+  const e = S.jobEntries[i];
+  if (!e.chat) e.chat = [];
+  e.chat.push({role:"user", content:msg});
+  e.history.push({role:"user", content:msg});
+  render();
+  try {
+    const reply = await streamChat(e.history, "job_history");
+    e.history.push({role:"assistant", content:reply});
+    e.chat.push({role:"assistant", content:reply});
+    const parsed = parseText(reply, "===JOB_1_START===", "===JOB_1_END===");
+    if (parsed) e.text = parsed;
+  } catch(err) { e.chat.push({role:"assistant", content:"エラー: "+err.message}); }
+  S.loading = false; S.loadingMode = ""; render();
+}
+
+function jobField(i,k,l,p,dis) {
+  const v = (S.jobEntries[i]||{})[k]||"";
+  return `<div class="field"><label>${l}</label><input id="f_job${i}_${k}" value="${v}" placeholder="${p}" ${dis?"disabled style='opacity:0.7'":""}></div>`;
+}
+function jobFieldTa(i,k,l,p,dis) {
+  const v = (S.jobEntries[i]||{})[k]||"";
+  return `<div class="field"><label>${l}</label><textarea id="f_job${i}_${k}" placeholder="${p}" ${dis?"disabled style='opacity:0.7'":""}>${v}</textarea></div>`;
+}
+
+function renderDutyInput() {
+  const c = COLORS.duty;
+  const valid = S.usDepartment && S.usPosition && S.usOfficeRole && S.domain;
+  const disabled = S.dutyItems.length > 0 || S.loading;
+  return `<div class="card" style="border-color:${c.light}">
+    <h3 style="color:${c.accent}">📋 Step 5：米国での業務内容</h3>
+    <p class="desc">米国赴任先の情報を入力してください</p>
+    ${!disabled && S._testData ? `<div class="btn-row"><button class="btn-test" onclick="loadTestStep('duty')">🧪 テストデータを入力</button></div>` : ""}
+    ${dField("usDepartment","米国赴任先での部門","例：品質管理、営業、研究開発", disabled)}
+    ${dField("usPosition","米国赴任先でのポジション","例：マネージャー、エンジニア", disabled)}
+    ${dField("usOfficeRole","米国赴任先で与えられているミッション","例：売上拡大、生産性向上、新製品の立ち上げ", disabled)}
+    ${dField("domain","対象（扱う製品、担当する設備、システムなど）","例：自動車用ブレーキ部品、半導体製造装置", disabled)}
+    ${!disabled ? `<button id="btn_duty" class="btn-gen" data-color="${c.accent}" style="background:${valid?c.accent:"#ccc"}" ${valid?"":"disabled"} onclick="startDuty()">業務内容を生成 →</button>` : ""}
+  </div>`;
+}
+
+function renderExpInput(disabled) {
+  const c = COLORS.exp;
+  const valid = S.department && S.position && S.yearsExperience && S.relevantExperience;
+  const yearOpts = ["3年未満","3〜10年","10〜20年","20年以上"].map(y => `<option value="${y}" ${S.yearsExperience===y?"selected":""}>${y}</option>`).join("");
+  return `<div class="card" style="border-color:${c.light}">
+    <h3 style="color:${c.accent}">📝 Step 7：業務経験</h3>
+    <p class="desc">現在の情報を入力してください</p>
+    ${!disabled && S._testData ? `<div class="btn-row"><button class="btn-test" onclick="loadTestStep('exp')">🧪 テストデータを入力</button></div>` : ""}
+    ${eField("department","現在の部門","例：品質管理、営業、研究開発", disabled)}
+    ${eField("position","現在のポジション","例：課長、主任、エンジニア", disabled)}
+    <div class="field"><label>この部門での経験年数</label>
+      <select id="f_yearsExperience" style="color:${S.yearsExperience?"#2c2c2c":"#6b6b6b"};${disabled?"opacity:0.7":""}" ${disabled?"disabled":""}>
+        <option value="">選択してください</option>${yearOpts}
+      </select>
+    </div>
+    ${eField("relevantExperience","米国でのミッション遂行に関連する経験","例：製造工程の品質改善活動、サプライヤー監査の実施", disabled)}
+    ${!disabled ? `<button id="btn_exp" class="btn-gen" data-color="${c.accent}" style="background:${valid?c.accent:"#ccc"}" ${valid?"":"disabled"} onclick="startExp()">業務経験を生成 →</button>` : ""}
+  </div>`;
+}
+
+function dField(k,l,p,dis) { return `<div class="field"><label>${l}</label><input id="f_${k}" value="${S[k]}" placeholder="${p}" ${dis?"disabled style='opacity:0.7'":""}></div>`; }
+function eField(k,l,p,dis) { return `<div class="field"><label>${l}</label><input id="f_${k}" value="${S[k]}" placeholder="${p}" ${dis?"disabled style='opacity:0.7'":""}></div>`; }
+
+// ============================================================
+// Helpers
+// ============================================================
+function escHtml(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>"); }
+function scrollDown() { setTimeout(() => window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}), 100); }
+
+function cleanTags(text) {
+  return text.replace(/===\w+_START===[\s\S]*?===\w+_END===/g, "")
+    .replace(/===BIZ_START===|===BIZ_END===/g, "")
+    .replace(/===CHANGE_START===|===CHANGE_END===/g, "")
+    .replace(/===CHALLENGE_START===|===CHALLENGE_END===/g, "")
+    .replace(/===PERSONNEL_START===|===PERSONNEL_END===/g, "")
+    .replace(/===DUTIES_START===|===DUTIES_END===/g, "")
+    .replace(/===EXP_START===|===EXP_END===/g, "").trim();
+}
+
+function parseText(text, startTag, endTag) {
+  const re = new RegExp(startTag.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + "([\\s\\S]*?)" + endTag.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  const m = text.match(re);
+  return m ? m[1].trim() : null;
+}
+
+function parseItems(text, startTag, endTag) {
+  const raw = parseText(text, startTag, endTag);
+  if (!raw) return null;
+  return raw.split("\n").filter(l => l.trim()).map(l => l.replace(/^\d+\.\s*/, "").trim());
+}
+
+// ============================================================
+// Bind inputs
+// ============================================================
+function bindAll() {
+  // Job history fields
+  for (let i = 0; i < S.jobEntries.length; i++) {
+    ["period","dept","title","role","work","result"].forEach(k => {
+      const el = document.getElementById(`f_job${i}_${k}`);
+      if (el) el.addEventListener("input", e => {
+        S.jobEntries[i][k] = e.target.value;
+        updateButtons();
+      });
+    });
+  }
+  // Chat for each job entry
+  S.jobEntries.forEach((e, i) => {
+    const ta = document.getElementById("chat_job_"+i);
+    if (ta) {
+      ta.addEventListener("input", ev => { ev.target.style.height="42px"; ev.target.style.height=Math.min(ev.target.scrollHeight,120)+"px"; });
+      ta.addEventListener("keydown", ev => { if (ev.key==="Enter" && !ev.shiftKey) { ev.preventDefault(); sendJobMsg(i); }});
+    }
+  });
+  // All input/textarea fields - update state without re-render
+  const allFields = ["bizProduct","bizActivity","bizCustomer","bizStrength","changeWhat","changeImpact","challengeGap","challengeWhere","personnelSkill","personnelWhy","usDepartment","usPosition","usOfficeRole","domain","department","position","relevantExperience"];
+  allFields.forEach(k => {
+    const el = document.getElementById("f_"+k);
+    if (el) el.addEventListener("input", e => { S[k] = e.target.value; updateButtons(); });
+  });
+  const sel = document.getElementById("f_yearsExperience");
+  if (sel) sel.addEventListener("change", e => { S.yearsExperience = e.target.value; updateButtons(); });
+  // Chat textareas
+  ["business_overview","situation_change","challenge","required_personnel","duty","experience"].forEach(mode => {
+    const ta = document.getElementById("chat_"+mode);
+    if (ta) {
+      ta.addEventListener("input", e => { e.target.style.height="42px"; e.target.style.height=Math.min(e.target.scrollHeight,120)+"px"; });
+      ta.addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(mode); }});
+    }
+  });
+}
+
+function updateButtons() {
+  // Check if inputs changed after generation - cascade clear subsequent steps
+  checkCascadeClear();
+
+  // Update all generate buttons' disabled state without re-rendering
+  const checks = [
+    { id:"btn_biz", valid: S.bizProduct && S.bizActivity && S.bizCustomer && S.bizStrength },
+    { id:"btn_change", valid: S.changeWhat && S.changeImpact },
+    { id:"btn_challenge", valid: S.challengeGap && S.challengeWhere },
+    { id:"btn_personnel", valid: S.personnelSkill && S.personnelWhy },
+    { id:"btn_duty", valid: S.usDepartment && S.usPosition && S.usOfficeRole && S.domain },
+    { id:"btn_exp", valid: S.department && S.position && S.yearsExperience && S.relevantExperience },
+  ];
+  checks.forEach(c => {
+    const btn = document.getElementById(c.id);
+    if (btn) { btn.disabled = !c.valid; btn.style.background = c.valid ? btn.dataset.color : "#ccc"; }
+  });
+  // Job entry buttons
+  S.jobEntries.forEach((e, i) => {
+    const btn = document.getElementById("btn_job_"+i);
+    if (btn) {
+      const filled = e.period && e.dept && e.title && e.role && e.work && e.result;
+      btn.disabled = !filled; btn.style.background = filled ? btn.dataset.color : "#ccc";
+    }
+  });
+}
+
+function checkCascadeClear() {
+  // If biz inputs changed after biz was generated, clear biz and everything after
+  if (S.bizText && S._bizSnapshot && (
+    S.bizProduct !== S._bizSnapshot.bizProduct || S.bizActivity !== S._bizSnapshot.bizActivity ||
+    S.bizCustomer !== S._bizSnapshot.bizCustomer || S.bizStrength !== S._bizSnapshot.bizStrength)) {
+    clearFrom("biz");
+    render();
+    return;
+  }
+  // If change inputs changed after change was generated
+  if (S.changeText && S._changeSnapshot && (
+    S.changeWhat !== S._changeSnapshot.changeWhat || S.changeImpact !== S._changeSnapshot.changeImpact)) {
+    clearFrom("change");
+    render();
+    return;
+  }
+  // If challenge inputs changed after challenge was generated
+  if (S.challengeText && S._challengeSnapshot && (
+    S.challengeGap !== S._challengeSnapshot.challengeGap || S.challengeWhere !== S._challengeSnapshot.challengeWhere)) {
+    clearFrom("challenge");
+    render();
+    return;
+  }
+  // If personnel inputs changed after personnel was generated
+  if (S.personnelText && S._personnelSnapshot && (
+    S.personnelSkill !== S._personnelSnapshot.personnelSkill || S.personnelWhy !== S._personnelSnapshot.personnelWhy)) {
+    clearFrom("personnel");
+    render();
+    return;
+  }
+}
+
+function clearFrom(step) {
+  const steps = ["biz","change","challenge","personnel","duty","exp"];
+  const idx = steps.indexOf(step);
+  // Current step: clear generated text only (keep inputs - user is editing them)
+  const s0 = steps[idx];
+  if (s0 === "biz") { S.bizText=""; S.bizHistory=[]; S.bizChat=[]; S.bizConfirmed=false; S._bizSnapshot=null; }
+  if (s0 === "change") { S.changeText=""; S.changeHistory=[]; S.changeChat=[]; S.changeConfirmed=false; S._changeSnapshot=null; }
+  if (s0 === "challenge") { S.challengeText=""; S.challengeHistory=[]; S.challengeChat=[]; S.challengeConfirmed=false; S._challengeSnapshot=null; }
+  if (s0 === "personnel") { S.personnelText=""; S.personnelHistory=[]; S.personnelChat=[]; S.personnelConfirmed=false; S._personnelSnapshot=null; }
+  if (s0 === "duty") { S.dutyItems=[]; S.dutyHistory=[]; S.dutyChat=[]; S.dutyConfirmed=false; }
+  if (s0 === "exp") { S.expItems=[]; S.expHistory=[]; S.expChat=[]; }
+  // Subsequent steps: clear both inputs and generated text
+  for (let i = idx+1; i < steps.length; i++) {
+    const s = steps[i];
+    if (s === "change") { S.changeWhat=""; S.changeImpact=""; S.changeText=""; S.changeHistory=[]; S.changeChat=[]; S.changeConfirmed=false; S._changeSnapshot=null; }
+    if (s === "challenge") { S.challengeGap=""; S.challengeWhere=""; S.challengeText=""; S.challengeHistory=[]; S.challengeChat=[]; S.challengeConfirmed=false; S._challengeSnapshot=null; }
+    if (s === "personnel") { S.personnelSkill=""; S.personnelWhy=""; S.personnelText=""; S.personnelHistory=[]; S.personnelChat=[]; S.personnelConfirmed=false; S._personnelSnapshot=null; }
+    if (s === "duty") { S.usDepartment=""; S.usPosition=""; S.usOfficeRole=""; S.domain=""; S.dutyItems=[]; S.dutyHistory=[]; S.dutyChat=[]; S.dutyConfirmed=false; }
+    if (s === "exp") { S.department=""; S.position=""; S.yearsExperience=""; S.relevantExperience=""; S.expItems=[]; S.expHistory=[]; S.expChat=[]; }
+  }
+}
+
+// ============================================================
+// Test data
+// ============================================================
+async function loadTestData() {
+  S.testLoading = true; render();
+  try {
+    const res = await fetch("/api/test-data");
+    if (!res.ok) { alert("テストデータ生成エラー: HTTP "+res.status); S.testLoading=false; render(); return; }
+    const d = await res.json();
+    if (d.error) { alert("エラー: "+d.error); } else {
+      S._testData = d;
+      console.log("Test data keys:", Object.keys(d));
+      console.log("job1_period:", d.job1_period);
+      // 職歴エントリーを2つ用意（テストデータは各エントリーのボタンで入力）
+      if (S.jobEntries.length < 2) {
+        S.jobEntries.push({period:"",dept:"",title:"",role:"",work:"",result:"",text:"",history:[],chat:[],confirmed:false});
+      }
+    }
+  } catch(e) { alert("エラー: "+e.message); }
+  S.testLoading = false; render();
+}
+
+function loadTestStep(step) {
+  const d = S._testData;
+  if (!d) return;
+  if (step === "biz") { S.bizProduct = d.bizProduct||""; S.bizActivity = d.bizActivity||""; S.bizCustomer = d.bizCustomer||""; S.bizStrength = d.bizStrength||""; }
+  if (step === "change") { S.changeWhat = d.changeWhat||""; S.changeImpact = d.changeImpact||""; }
+  if (step === "challenge") { S.challengeGap = d.challengeGap||""; S.challengeWhere = d.challengeWhere||""; }
+  if (step === "personnel") { S.personnelSkill = d.personnelSkill||""; S.personnelWhy = d.personnelWhy||""; }
+  if (step === "duty") { S.usDepartment = d.usDepartment||""; S.usPosition = d.usPosition||""; S.usOfficeRole = d.usOfficeRole||""; S.domain = d.domain||""; }
+  if (step === "exp") { S.department = d.department||""; S.position = d.position||""; S.yearsExperience = d.yearsExperience||""; S.relevantExperience = d.relevantExperience||""; }
+  render();
+}
+
+async function generateAndLoadStep(step) {
+  S.testLoading = true; render();
+  try {
+    const res = await fetch("/api/test-data");
+    if (!res.ok) { alert("テストデータ生成エラー: HTTP "+res.status); S.testLoading=false; render(); return; }
+    const d = await res.json();
+    if (d.error) { alert("エラー: "+d.error); } else {
+      S._testData = d;
+      loadTestStep(step);
+    }
+  } catch(e) { alert("エラー: "+e.message); }
+  S.testLoading = false; render();
+}
+
+// ============================================================
+// Streaming
+// ============================================================
+async function streamChat(messages, mode) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000);
+  try {
+    const res = await fetch("/api/chat", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({messages,mode}), signal:controller.signal });
+    clearTimeout(timeout);
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let full="", buf="";
+    while (true) {
+      const {done,value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split("\n"); buf = lines.pop()||"";
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6);
+        if (data==="[DONE]") return full;
+        if (data.startsWith("[ERROR]")) throw new Error(data.slice(8));
+        try { full += JSON.parse(data); } catch { full += data; }
+      }
+    }
+    return full;
+  } catch(e) {
+    clearTimeout(timeout);
+    if (e.name === "AbortError") throw new Error("60秒以内に応答がありませんでした。もう一度お試しください。");
+    throw e;
+  }
+}
+
+// ============================================================
+// Generate dispatch reason sections
+// ============================================================
+async function generate(mode) {
+  S.loading = true; S.loadingMode = mode; render();
+
+  let userContent = "";
+  let histKey, textKey, chatKey, startTag, endTag;
+
+  if (mode === "business_overview") {
+    userContent = `米国子会社の情報です。\n製品・サービス: ${S.bizProduct}\n事業活動: ${S.bizActivity}\n顧客・用途: ${S.bizCustomer}\n強み・特徴: ${S.bizStrength}\n\nこの情報をもとに、サポートレターに使えるビジネス概要の文章を生成してください。`;
+    histKey="bizHistory"; textKey="bizText"; chatKey="bizChat"; startTag="===BIZ_START==="; endTag="===BIZ_END===";
+  } else if (mode === "situation_change") {
+    userContent = `ビジネス概要:\n${S.bizText}\n\n状況の変化:\n変化の内容: ${S.changeWhat}\n具体的な影響: ${S.changeImpact}\n\nこの情報をもとに、派遣理由に使える「状況の変化」の文章を生成してください。`;
+    histKey="changeHistory"; textKey="changeText"; chatKey="changeChat"; startTag="===CHANGE_START==="; endTag="===CHANGE_END===";
+  } else if (mode === "challenge") {
+    userContent = `ビジネス概要:\n${S.bizText}\n\n状況の変化:\n${S.changeText}\n\n課題の情報:\n足りていないこと: ${S.challengeGap}\n解決すべき課題: ${S.challengeWhere}\n\nこの情報をもとに、派遣理由に使える「課題」の文章を生成してください。`;
+    histKey="challengeHistory"; textKey="challengeText"; chatKey="challengeChat"; startTag="===CHALLENGE_START==="; endTag="===CHALLENGE_END===";
+  } else if (mode === "required_personnel") {
+    userContent = `ビジネス概要:\n${S.bizText}\n\n状況の変化:\n${S.changeText}\n\n課題:\n${S.challengeText}\n\n必要な人材の情報:\n必要なスキル・経験: ${S.personnelSkill}\n日本から派遣する理由: ${S.personnelWhy}\n\nこの情報をもとに、派遣理由に使える「必要な人材」の文章を生成してください。`;
+    histKey="personnelHistory"; textKey="personnelText"; chatKey="personnelChat"; startTag="===PERSONNEL_START==="; endTag="===PERSONNEL_END===";
+  }
+
+  const userMsg = {role:"user", content:userContent};
+  S[histKey] = [userMsg];
+
+  try {
+    const reply = await streamChat([userMsg], mode);
+    S[histKey].push({role:"assistant", content:reply});
+    const parsed = parseText(reply, startTag, endTag);
+    if (parsed) {
+      S[textKey] = parsed;
+    } else {
+      // タグが見つからない場合は生テキストを使用
+      const cleaned = cleanTags(reply);
+      if (cleaned) S[textKey] = cleaned;
+      else S[chatKey] = [{role:"assistant", content:"生成結果を解析できませんでした。もう一度お試しください。"}];
+    }
+    // Save snapshot of inputs for change detection
+    if (mode === "business_overview") S._bizSnapshot = {bizProduct:S.bizProduct, bizActivity:S.bizActivity, bizCustomer:S.bizCustomer, bizStrength:S.bizStrength};
+    if (mode === "situation_change") S._changeSnapshot = {changeWhat:S.changeWhat, changeImpact:S.changeImpact};
+    if (mode === "challenge") S._challengeSnapshot = {challengeGap:S.challengeGap, challengeWhere:S.challengeWhere};
+    if (mode === "required_personnel") S._personnelSnapshot = {personnelSkill:S.personnelSkill, personnelWhy:S.personnelWhy};
+  } catch(e) { S[chatKey] = [{role:"assistant", content:"エラー: "+e.message}]; }
+
+  S.loading = false; S.loadingMode = ""; render(); scrollDown();
+}
+
+// ============================================================
+// Generate Duty & Experience
+// ============================================================
+async function startDuty() {
+  S.loading = true; S.loadingMode = "duty"; render();
+  const text = `米国赴任先での部門: ${S.usDepartment}\n米国赴任先でのポジション: ${S.usPosition}\n米国赴任先で与えられているミッション: ${S.usOfficeRole}\n対象: ${S.domain}`;
+  const userMsg = {role:"user", content:`私の情報です。\n${text}\n\nこの情報をもとに、米国での業務内容の候補を5つ生成してください。`};
+  S.dutyHistory = [userMsg];
+  try {
+    const reply = await streamChat([userMsg], "duty");
+    S.dutyHistory.push({role:"assistant", content:reply});
+    const parsed = parseItems(reply, "===DUTIES_START===", "===DUTIES_END===");
+    if (parsed) S.dutyItems = parsed;
+  } catch(e) { S.dutyChat = [{role:"assistant", content:"エラー: "+e.message}]; }
+  S.loading = false; S.loadingMode = ""; render(); scrollDown();
+}
+
+async function startExp() {
+  S.loading = true; S.loadingMode = "experience"; render();
+  const text = `米国赴任先での部門: ${S.usDepartment}\n米国赴任先でのポジション: ${S.usPosition}\n米国赴任先で与えられているミッション: ${S.usOfficeRole}\n対象: ${S.domain}\n現在の部門: ${S.department}\n現在のポジション: ${S.position}\nこの部門での経験年数: ${S.yearsExperience}\nミッション遂行に関連する経験: ${S.relevantExperience}`;
+  const dutiesSummary = S.dutyItems.map((d,i) => `${i+1}. ${d}`).join("\n");
+  const jobSummary = S.jobEntries.filter(e => e.text).map((e,i) => `【職歴${i+1}】${e.period} ${e.dept} ${e.title}\n${e.text}`).join("\n\n");
+  const userMsg = {role:"user", content:`私の情報です。\n${text}\n\n米国での業務内容:\n${dutiesSummary}\n\n職歴:\n${jobSummary}\n\n上記の職歴から、米国での業務内容を遂行するために必要なスキル・知識を抽出し、業務経験の候補を5つ生成してください。職歴の具体的な内容を抽象化して、経験の種類として表現してください。`};
+  S.expHistory = [userMsg];
+  try {
+    const reply = await streamChat([userMsg], "experience");
+    S.expHistory.push({role:"assistant", content:reply});
+    const parsed = parseItems(reply, "===EXP_START===", "===EXP_END===");
+    if (parsed) S.expItems = parsed;
+  } catch(e) { S.expChat = [{role:"assistant", content:"エラー: "+e.message}]; }
+  S.loading = false; S.loadingMode = ""; render(); scrollDown();
+}
+
+// ============================================================
+// Chat (feedback for any section)
+// ============================================================
+async function sendMsg(mode) {
+  const ta = document.getElementById("chat_"+mode);
+  if (!ta || !ta.value.trim() || S.loading) return;
+  const userMsg = ta.value.trim();
+  S.loading = true; S.loadingMode = mode;
+
+  const map = {
+    business_overview: {h:"bizHistory",c:"bizChat",t:"bizText",s:"===BIZ_START===",e:"===BIZ_END===",list:false},
+    situation_change: {h:"changeHistory",c:"changeChat",t:"changeText",s:"===CHANGE_START===",e:"===CHANGE_END===",list:false},
+    challenge: {h:"challengeHistory",c:"challengeChat",t:"challengeText",s:"===CHALLENGE_START===",e:"===CHALLENGE_END===",list:false},
+    required_personnel: {h:"personnelHistory",c:"personnelChat",t:"personnelText",s:"===PERSONNEL_START===",e:"===PERSONNEL_END===",list:false},
+    duty: {h:"dutyHistory",c:"dutyChat",t:"dutyItems",s:"===DUTIES_START===",e:"===DUTIES_END===",list:true},
+    experience: {h:"expHistory",c:"expChat",t:"expItems",s:"===EXP_START===",e:"===EXP_END===",list:true},
+  };
+  const m = map[mode];
+  S[m.c].push({role:"user",content:userMsg});
+  S[m.h].push({role:"user",content:userMsg});
+  render();
+
+  try {
+    const reply = await streamChat(S[m.h], mode);
+    S[m.h].push({role:"assistant",content:reply});
+    S[m.c].push({role:"assistant",content:reply});
+    if (m.list) {
+      const parsed = parseItems(reply, m.s, m.e);
+      if (parsed) S[m.t] = [...S[m.t], ...parsed];
+    } else {
+      const parsed = parseText(reply, m.s, m.e);
+      if (parsed) S[m.t] = parsed;
+    }
+  } catch(e) { S[m.c].push({role:"assistant",content:"エラー: "+e.message}); }
+  S.loading = false; S.loadingMode = ""; render();
+}
+
+// ============================================================
+// Log & Reset
+// ============================================================
+function copyLog() {
+  let log = "=== サポートレター作成支援ツール ログ ===\n\n";
+
+  // Step 1
+  if (S.bizProduct || S.bizText) {
+    log += "【Step 1：ビジネス概要】\n";
+    log += `入力 → 製品・サービス: ${S.bizProduct} / 事業活動: ${S.bizActivity} / 顧客・用途: ${S.bizCustomer} / 強み: ${S.bizStrength}\n`;
+    if (S.bizText) log += `生成 → ${S.bizText}\n`;
+    log += "\n";
+  }
+  // Step 2
+  if (S.changeWhat || S.changeText) {
+    log += "【Step 2：状況の変化】\n";
+    log += `入力 → 変化: ${S.changeWhat} / 影響: ${S.changeImpact}\n`;
+    if (S.changeText) log += `生成 → ${S.changeText}\n`;
+    log += "\n";
+  }
+  // Step 3
+  if (S.challengeGap || S.challengeText) {
+    log += "【Step 3：課題】\n";
+    log += `入力 → 不足: ${S.challengeGap} / 課題: ${S.challengeWhere}\n`;
+    if (S.challengeText) log += `生成 → ${S.challengeText}\n`;
+    log += "\n";
+  }
+  // Step 4
+  if (S.personnelSkill || S.personnelText) {
+    log += "【Step 4：必要な人材】\n";
+    log += `入力 → スキル: ${S.personnelSkill} / 派遣理由: ${S.personnelWhy}\n`;
+    if (S.personnelText) log += `生成 → ${S.personnelText}\n`;
+    log += "\n";
+  }
+  // Step 5
+  if (S.usDepartment || S.dutyItems.length) {
+    log += "【Step 5：米国での業務内容】\n";
+    log += `入力 → 部門: ${S.usDepartment} / ポジション: ${S.usPosition} / ミッション: ${S.usOfficeRole} / 対象: ${S.domain}\n`;
+    if (S.dutyItems.length) log += `生成 →\n` + S.dutyItems.map((d,i)=>`${i+1}. ${d}`).join("\n") + "\n";
+    log += "\n";
+  }
+  // Step 6
+  if (S.jobEntries.some(e => e.period || e.text)) {
+    log += "【Step 6：職歴】\n";
+    S.jobEntries.forEach((e, i) => {
+      if (e.period) {
+        log += `入力${i+1} → 期間: ${e.period} / 部署: ${e.dept} / 役職: ${e.title} / 役割: ${e.role} / 取り組み: ${e.work} / 成果: ${e.result}\n`;
+        if (e.text) log += `生成${i+1} → ${e.text}\n`;
+      }
+    });
+    log += "\n";
+  }
+  // Step 7
+  if (S.department || S.expItems.length) {
+    log += "【Step 7：業務経験】\n";
+    log += `入力 → 部門: ${S.department} / ポジション: ${S.position} / 経験年数: ${S.yearsExperience} / 関連経験: ${S.relevantExperience}\n`;
+    if (S.expItems.length) log += `生成 →\n` + S.expItems.map((d,i)=>`${i+1}. ${d}`).join("\n") + "\n";
+    log += "\n";
+  }
+
+  navigator.clipboard.writeText(log).then(() => alert("ログをコピーしました")).catch(() => {
+    const ta = document.createElement("textarea"); ta.value=log; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); alert("ログをコピーしました");
+  });
+}
+
+function resetAll() {
+  S = { jobEntries:[{period:"",dept:"",title:"",role:"",work:"",result:"",text:"",history:[],chat:[],confirmed:false}], jobConfirmed:false,
+    bizProduct:"",bizActivity:"",bizCustomer:"",bizStrength:"",bizText:"",bizHistory:[],bizChat:[],bizConfirmed:false,
+    changeWhat:"",changeImpact:"",changeText:"",changeHistory:[],changeChat:[],changeConfirmed:false,
+    challengeGap:"",challengeWhere:"",challengeText:"",challengeHistory:[],challengeChat:[],challengeConfirmed:false,
+    personnelSkill:"",personnelWhy:"",personnelText:"",personnelHistory:[],personnelChat:[],personnelConfirmed:false,
+    usDepartment:"",usPosition:"",usOfficeRole:"",domain:"",dutyItems:[],dutyHistory:[],dutyChat:[],dutyConfirmed:false,
+    department:"",position:"",yearsExperience:"",relevantExperience:"",expItems:[],expHistory:[],expChat:[],
+    loading:false,loadingMode:"",testLoading:false,_testData:null };
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
