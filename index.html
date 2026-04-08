@@ -193,7 +193,7 @@ function renderPage() {
       h += renderListSection(COLORS.duty, "📋 米国での業務内容", S.dutyItems, S.dutyChat, "duty", "===DUTIES_START===", "===DUTIES_END===");
     }
     if (S.dutyItems.length > 0 && !S.loading && !S.dutyConfirmed) {
-      h += `<button class="btn-confirm" onclick="confirmDuty()" ${S.dutyChecked.some(c=>c) ? "" : "disabled style='opacity:0.5'"}>チェック済みの業務内容で確定する ✓（${S.dutyChecked.filter(c=>c).length}件選択中）</button>`;
+      h += `<button class="btn-confirm" onclick="S.dutyConfirmed=true;render();scrollDown()">この業務内容で確定する ✓</button>`;
     }
   }
 
@@ -298,7 +298,7 @@ function renderListSection(c, title, items, chat, mode, startTag, endTag) {
       ? items.map((d,i) => `<div class="result-item" style="align-items:flex-start"><label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;flex:1"><input type="checkbox" ${S.dutyChecked[i]?"checked":""} onchange="S.dutyChecked[${i}]=this.checked;render()" style="margin-top:4px;accent-color:${c.accent};width:18px;height:18px;flex-shrink:0"><span style="opacity:${S.dutyChecked[i]?1:0.55}">${escHtml(d)}</span></label></div>`).join("")
       : items.map((d,i) => `<div class="result-item"><span class="result-num" style="color:${c.accent}">${i+1}.</span><span>${escHtml(d)}</span></div>`).join("");
     const hint = isDuty
-      ? "💡 修正したい候補にチェックを入れてからチャットで指示してください。追加生成も可能です。"
+      ? "💡 差し替えたい候補にチェックを入れてからチャットで指示してください"
       : "💡 追加で候補が欲しい場合や、方向性のリクエストがあればチャットで伝えてください";
     h += `<div class="result-card" style="background:${c.light};border-color:${c.light}">
       <div class="result-header" style="color:${c.accent}">${title}の候補（${items.length}件）</div>
@@ -708,13 +708,6 @@ function checkCascadeClear() {
   }
 }
 
-function confirmDuty() {
-  S.dutyItems = S.dutyItems.filter((_, i) => S.dutyChecked[i]);
-  S.dutyChecked = S.dutyItems.map(() => true);
-  S.dutyConfirmed = true;
-  render(); scrollDown();
-}
-
 function clearFrom(step) {
   const steps = ["biz","change","challenge","personnel","duty","exp"];
   const idx = steps.indexOf(step);
@@ -918,10 +911,17 @@ async function sendMsg(mode) {
   };
   const m = map[mode];
   if (mode === "duty") {
-    const checkedItems = S.dutyItems.filter((_,i) => S.dutyChecked[i]).map((d,i) => `${i+1}. ${d}`).join("\n");
-    const contextMsg = checkedItems ? `【現在選択中の業務内容】\n${checkedItems}\n\n${userMsg}` : userMsg;
-    S[m.c].push({role:"user", content:userMsg});
-    S[m.h].push({role:"user", content:contextMsg});
+    const checkedIndices = S.dutyChecked.map((c,i) => c ? i : -1).filter(i => i !== -1);
+    const checkedCount = checkedIndices.length;
+    if (checkedCount === 0) {
+      S[m.c].push({role:"user", content:userMsg});
+      S[m.h].push({role:"user", content:userMsg});
+    } else {
+      const checkedList = checkedIndices.map(i => `${i+1}. ${S.dutyItems[i]}`).join("\n");
+      const contextMsg = `以下の${checkedCount}件を差し替えたいです。代わりの候補を${checkedCount}件だけ生成してください。\n\n【差し替え対象】\n${checkedList}\n\n【リクエスト】\n${userMsg}`;
+      S[m.c].push({role:"user", content:userMsg});
+      S[m.h].push({role:"user", content:contextMsg});
+    }
   } else {
     S[m.c].push({role:"user",content:userMsg});
     S[m.h].push({role:"user",content:userMsg});
@@ -935,8 +935,19 @@ async function sendMsg(mode) {
     if (m.list) {
       const parsed = parseItems(reply, m.s, m.e);
       if (parsed) {
-        S[m.t] = [...S[m.t], ...parsed];
-        if (mode === "duty") S.dutyChecked = [...S.dutyChecked, ...parsed.map(() => false)];
+        if (mode === "duty") {
+          const checkedIndices = S.dutyChecked.map((c,i) => c ? i : -1).filter(i => i !== -1);
+          if (checkedIndices.length > 0 && parsed.length > 0) {
+            const newItems = [...S.dutyItems];
+            checkedIndices.forEach((itemIdx, j) => { if (j < parsed.length) newItems[itemIdx] = parsed[j]; });
+            S.dutyItems = newItems;
+          } else {
+            S.dutyItems = [...S.dutyItems, ...parsed];
+          }
+          S.dutyChecked = S.dutyItems.map(() => false);
+        } else {
+          S[m.t] = [...S[m.t], ...parsed];
+        }
       }
     } else {
       const parsed = parseText(reply, m.s, m.e);
