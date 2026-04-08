@@ -107,7 +107,7 @@ let S = {
   personnelText:"", personnelHistory:[], personnelChat:[], personnelConfirmed:false,
   // Duty
   usDepartment:"", usPosition:"", usOfficeRole:"", domain:"",
-  dutyItems:[], dutyHistory:[], dutyChat:[], dutyConfirmed:false,
+  dutyItems:[], dutyChecked:[], dutyHistory:[], dutyChat:[], dutyConfirmed:false,
   // Experience
   department:"", position:"", yearsExperience:"", relevantExperience:"",
   expItems:[], expHistory:[], expChat:[],
@@ -193,7 +193,7 @@ function renderPage() {
       h += renderListSection(COLORS.duty, "📋 米国での業務内容", S.dutyItems, S.dutyChat, "duty", "===DUTIES_START===", "===DUTIES_END===");
     }
     if (S.dutyItems.length > 0 && !S.loading && !S.dutyConfirmed) {
-      h += `<button class="btn-confirm" onclick="S.dutyConfirmed=true;render();scrollDown()">この業務内容で確定する ✓</button>`;
+      h += `<button class="btn-confirm" onclick="confirmDuty()" ${S.dutyChecked.some(c=>c) ? "" : "disabled style='opacity:0.5'"}>チェック済みの業務内容で確定する ✓（${S.dutyChecked.filter(c=>c).length}件選択中）</button>`;
     }
   }
 
@@ -293,10 +293,17 @@ function renderListSection(c, title, items, chat, mode, startTag, endTag) {
     return h;
   }
   if (items.length > 0) {
+    const isDuty = mode === "duty";
+    const itemsHtml = isDuty
+      ? items.map((d,i) => `<div class="result-item" style="align-items:flex-start"><label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;flex:1"><input type="checkbox" ${S.dutyChecked[i]?"checked":""} onchange="S.dutyChecked[${i}]=this.checked;render()" style="margin-top:4px;accent-color:${c.accent};width:18px;height:18px;flex-shrink:0"><span style="opacity:${S.dutyChecked[i]?1:0.55}">${escHtml(d)}</span></label></div>`).join("")
+      : items.map((d,i) => `<div class="result-item"><span class="result-num" style="color:${c.accent}">${i+1}.</span><span>${escHtml(d)}</span></div>`).join("");
+    const hint = isDuty
+      ? "💡 修正したい候補にチェックを入れてからチャットで指示してください。追加生成も可能です。"
+      : "💡 追加で候補が欲しい場合や、方向性のリクエストがあればチャットで伝えてください";
     h += `<div class="result-card" style="background:${c.light};border-color:${c.light}">
       <div class="result-header" style="color:${c.accent}">${title}の候補（${items.length}件）</div>
-      ${items.map((d,i) => `<div class="result-item"><span class="result-num" style="color:${c.accent}">${i+1}.</span><span>${escHtml(d)}</span></div>`).join("")}
-      <div class="result-hint">💡 追加で候補が欲しい場合や、方向性のリクエストがあればチャットで伝えてください</div>
+      ${itemsHtml}
+      <div class="result-hint">${hint}</div>
     </div>`;
     h += renderChatArea(c, chat, mode, isLoading);
   }
@@ -701,6 +708,13 @@ function checkCascadeClear() {
   }
 }
 
+function confirmDuty() {
+  S.dutyItems = S.dutyItems.filter((_, i) => S.dutyChecked[i]);
+  S.dutyChecked = S.dutyItems.map(() => true);
+  S.dutyConfirmed = true;
+  render(); scrollDown();
+}
+
 function clearFrom(step) {
   const steps = ["biz","change","challenge","personnel","duty","exp"];
   const idx = steps.indexOf(step);
@@ -710,7 +724,7 @@ function clearFrom(step) {
   if (s0 === "change") { S.changeText=""; S.changeHistory=[]; S.changeChat=[]; S.changeConfirmed=false; S._changeSnapshot=null; }
   if (s0 === "challenge") { S.challengeText=""; S.challengeHistory=[]; S.challengeChat=[]; S.challengeConfirmed=false; S._challengeSnapshot=null; }
   if (s0 === "personnel") { S.personnelText=""; S.personnelHistory=[]; S.personnelChat=[]; S.personnelConfirmed=false; S._personnelSnapshot=null; }
-  if (s0 === "duty") { S.dutyItems=[]; S.dutyHistory=[]; S.dutyChat=[]; S.dutyConfirmed=false; }
+  if (s0 === "duty") { S.dutyItems=[]; S.dutyChecked=[]; S.dutyHistory=[]; S.dutyChat=[]; S.dutyConfirmed=false; }
   if (s0 === "exp") { S.expItems=[]; S.expHistory=[]; S.expChat=[]; }
   // Subsequent steps: clear both inputs and generated text
   for (let i = idx+1; i < steps.length; i++) {
@@ -718,7 +732,7 @@ function clearFrom(step) {
     if (s === "change") { S.changeWhat=""; S.changeImpact=""; S.changeText=""; S.changeHistory=[]; S.changeChat=[]; S.changeConfirmed=false; S._changeSnapshot=null; }
     if (s === "challenge") { S.challengeGap=""; S.challengeWhere=""; S.challengeText=""; S.challengeHistory=[]; S.challengeChat=[]; S.challengeConfirmed=false; S._challengeSnapshot=null; }
     if (s === "personnel") { S.personnelSkill=""; S.personnelWhy=""; S.personnelText=""; S.personnelHistory=[]; S.personnelChat=[]; S.personnelConfirmed=false; S._personnelSnapshot=null; }
-    if (s === "duty") { S.usDepartment=""; S.usPosition=""; S.usOfficeRole=""; S.domain=""; S.dutyItems=[]; S.dutyHistory=[]; S.dutyChat=[]; S.dutyConfirmed=false; }
+    if (s === "duty") { S.usDepartment=""; S.usPosition=""; S.usOfficeRole=""; S.domain=""; S.dutyItems=[]; S.dutyChecked=[]; S.dutyHistory=[]; S.dutyChat=[]; S.dutyConfirmed=false; }
     if (s === "exp") { S.department=""; S.position=""; S.yearsExperience=""; S.relevantExperience=""; S.expItems=[]; S.expHistory=[]; S.expChat=[]; }
   }
 }
@@ -864,7 +878,7 @@ async function startDuty() {
     const reply = await streamChat([userMsg], "duty");
     S.dutyHistory.push({role:"assistant", content:reply});
     const parsed = parseItems(reply, "===DUTIES_START===", "===DUTIES_END===");
-    if (parsed) S.dutyItems = parsed;
+    if (parsed) { S.dutyItems = parsed; S.dutyChecked = parsed.map(() => false); }
   } catch(e) { S.dutyChat = [{role:"assistant", content:"エラー: "+e.message}]; }
   S.loading = false; S.loadingMode = ""; render(); scrollDown();
 }
@@ -903,8 +917,15 @@ async function sendMsg(mode) {
     experience: {h:"expHistory",c:"expChat",t:"expItems",s:"===EXP_START===",e:"===EXP_END===",list:true},
   };
   const m = map[mode];
-  S[m.c].push({role:"user",content:userMsg});
-  S[m.h].push({role:"user",content:userMsg});
+  if (mode === "duty") {
+    const checkedItems = S.dutyItems.filter((_,i) => S.dutyChecked[i]).map((d,i) => `${i+1}. ${d}`).join("\n");
+    const contextMsg = checkedItems ? `【現在選択中の業務内容】\n${checkedItems}\n\n${userMsg}` : userMsg;
+    S[m.c].push({role:"user", content:userMsg});
+    S[m.h].push({role:"user", content:contextMsg});
+  } else {
+    S[m.c].push({role:"user",content:userMsg});
+    S[m.h].push({role:"user",content:userMsg});
+  }
   render();
 
   try {
@@ -913,7 +934,10 @@ async function sendMsg(mode) {
     S[m.c].push({role:"assistant",content:reply});
     if (m.list) {
       const parsed = parseItems(reply, m.s, m.e);
-      if (parsed) S[m.t] = [...S[m.t], ...parsed];
+      if (parsed) {
+        S[m.t] = [...S[m.t], ...parsed];
+        if (mode === "duty") S.dutyChecked = [...S.dutyChecked, ...parsed.map(() => false)];
+      }
     } else {
       const parsed = parseText(reply, m.s, m.e);
       if (parsed) S[m.t] = parsed;
@@ -993,7 +1017,7 @@ function resetAll() {
     changeWhat:"",changeImpact:"",changeText:"",changeHistory:[],changeChat:[],changeConfirmed:false,
     challengeGap:"",challengeWhere:"",challengeText:"",challengeHistory:[],challengeChat:[],challengeConfirmed:false,
     personnelSkill:"",personnelWhy:"",personnelText:"",personnelHistory:[],personnelChat:[],personnelConfirmed:false,
-    usDepartment:"",usPosition:"",usOfficeRole:"",domain:"",dutyItems:[],dutyHistory:[],dutyChat:[],dutyConfirmed:false,
+    usDepartment:"",usPosition:"",usOfficeRole:"",domain:"",dutyItems:[],dutyChecked:[],dutyHistory:[],dutyChat:[],dutyConfirmed:false,
     department:"",position:"",yearsExperience:"",relevantExperience:"",expItems:[],expHistory:[],expChat:[],
     loading:false,loadingMode:"",testLoading:false,_testData:null };
   render();
